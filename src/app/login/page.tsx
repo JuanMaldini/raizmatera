@@ -21,16 +21,20 @@ export default async function LoginPage({
   const { volver } = await searchParams;
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-8 px-5">
-      <Image
-        src="/logo-transparente.png"
-        alt="Raíz Matera"
-        width={96}
-        height={96}
-        priority
-        className="h-24 w-24"
-      />
-      <LoginForm volver={volver ?? "/admin"} />
+    <main className="grid min-h-dvh place-items-center px-5 py-10">
+      <div className="marco-doble w-full max-w-md">
+        <div className="flex flex-col items-center gap-7 px-6 py-12">
+          <Image
+            src="/logo-transparente.png"
+            alt="Raíz Matera"
+            width={96}
+            height={96}
+            priority
+            className="h-24 w-24"
+          />
+          <LoginForm volver={volver ?? "/admin"} />
+        </div>
+      </div>
     </main>
   );
 }

@@ -30,15 +30,6 @@ export default async function AdminLayout({
           </Link>
 
           <nav className="flex items-center gap-5 text-sm uppercase tracking-widest text-oliva">
-            <Link href="/admin" className="hover:text-caramelo">
-              Productos
-            </Link>
-            <Link href="/admin/ajustes" className="hover:text-caramelo">
-              Ajustes
-            </Link>
-            <Link href="/" className="hover:text-caramelo">
-              Ver web
-            </Link>
             <form action={cerrarSesion}>
               <button type="submit" className="uppercase hover:text-caramelo">
                 Salir

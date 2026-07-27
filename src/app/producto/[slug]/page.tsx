@@ -6,7 +6,7 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { getAjustes, getProducto, getProductos } from "@/lib/pb-public";
 import { precio } from "@/lib/format";
-import { linkProducto } from "@/lib/whatsapp";
+import { INSTAGRAM_DM, linkProducto } from "@/lib/whatsapp";
 import { SITE_NAME, siteUrl } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -114,25 +114,28 @@ export default async function ProductoPage({
 
             <span className="chip-precio">{precio(producto.precio)}</span>
 
-            {whatsapp ? (
+            <div className="flex w-full max-w-xs flex-col gap-3">
+              {/* ig.me/m abre directamente los mensajes de la cuenta, no el perfil. */}
               <a
-                href={whatsapp}
+                href={INSTAGRAM_DM}
                 target="_blank"
                 rel="noreferrer"
-                className="border border-oliva px-6 py-2.5 text-sm uppercase tracking-widest text-oliva transition hover:bg-oliva hover:text-arena"
-              >
-                Consultar por WhatsApp
-              </a>
-            ) : (
-              <a
-                href="https://instagram.com/raiiz_matera"
-                target="_blank"
-                rel="noreferrer"
-                className="border border-oliva px-6 py-2.5 text-sm uppercase tracking-widest text-oliva transition hover:bg-oliva hover:text-arena"
+                className="border border-oliva px-6 py-2.5 text-center text-sm uppercase tracking-widest text-oliva transition hover:bg-oliva hover:text-arena hover:shadow-md"
               >
                 Consultar por Instagram
               </a>
-            )}
+
+              {whatsapp && (
+                <a
+                  href={whatsapp}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-oliva px-6 py-2.5 text-center text-sm uppercase tracking-widest text-arena transition hover:bg-oliva/90 hover:shadow-md"
+                >
+                  Consultar por WhatsApp
+                </a>
+              )}
+            </div>
           </div>
         </article>
       </main>

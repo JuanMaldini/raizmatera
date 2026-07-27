@@ -11,6 +11,7 @@ import {
   quitarFoto,
   SLUG_AJUSTES,
 } from "@/lib/pb-admin";
+import { SEPARADOR_PLANTILLAS } from "@/types/producto";
 
 export interface EstadoForm {
   error?: string;
@@ -34,6 +35,33 @@ function slugificar(texto: string): string {
 async function slugLibre(slug: string, exceptoId?: string): Promise<boolean> {
   const records = await listarRecords();
   return !records.some((r) => r.slug === slug && r.id !== exceptoId);
+}
+
+/**
+ * Crea el record de ajustes, que no es un producto y por eso iría en precio 0.
+ *
+ * Si el campo `price` de la colección tiene la restricción Nonzero, PocketBase
+ * rechaza el 0. En vez de pedirle a alguien que vaya a destildarla, se reintenta
+ * con 1: el precio de este record no se muestra en ninguna parte, porque el
+ * front considera producto solo a lo que tiene categoría. Cuando la restricción
+ * no está, el 0 entra al primer intento y queda más prolijo.
+ */
+async function crearRecordDeAjustes(plantilla: string, numero: string) {
+  const base = {
+    title: numero,
+    slug: SLUG_AJUSTES,
+    description: plantilla,
+    category: "",
+  };
+
+  try {
+    return await crearProducto({ ...base, price: 0 });
+  } catch (e) {
+    const mensaje = e instanceof Error ? e.message : "";
+    if (!mensaje.includes("price")) throw e;
+
+    return crearProducto({ ...base, price: 1 });
+  }
 }
 
 function leerProducto(formData: FormData) {
@@ -108,12 +136,18 @@ export async function guardarAjustes(
   formData: FormData
 ): Promise<EstadoForm> {
   const numero = String(formData.get("whatsapp") ?? "").replace(/\D/g, "");
-  const plantilla = String(formData.get("plantilla") ?? "").trim();
+  const deProducto = String(formData.get("plantillaProducto") ?? "").trim();
+  const general = String(formData.get("plantillaGeneral") ?? "").trim();
 
   if (numero && numero.length < 8) {
     return { error: "El número parece incompleto. Va con código de país y sin el +." };
   }
-  if (!plantilla) return { error: "La plantilla no puede quedar vacía." };
+  if (!deProducto) return { error: "El mensaje de producto no puede quedar vacío." };
+  if (!general) return { error: "El mensaje general no puede quedar vacío." };
+
+  // Las dos plantillas comparten el campo `description`, separadas por una
+  // línea con el separador.
+  const plantilla = `${deProducto}\n${SEPARADOR_PLANTILLAS}\n${general}`;
 
   const records = await listarRecords();
   const existente = records.find((r) => r.slug === SLUG_AJUSTES);
@@ -125,30 +159,12 @@ export async function guardarAjustes(
         description: plantilla,
       });
     } else {
-      await crearProducto({
-        title: numero,
-        slug: SLUG_AJUSTES,
-        description: plantilla,
-        category: "",
-        price: 0,
-      });
+      await crearRecordDeAjustes(plantilla, numero);
     }
   } catch (e) {
-    const mensaje = e instanceof Error ? e.message : "No se pudo guardar.";
-
-    // El record de ajustes no es un producto y va en precio 0. Si el campo
-    // `price` tiene la restricción Nonzero, PocketBase lo rechaza y conviene
-    // decir exactamente qué destildar en vez de mostrar el error crudo.
-    if (mensaje.includes("price")) {
-      return {
-        error:
-          "PocketBase rechaza el precio 0. Destildá «Nonzero» en el campo price de raizmatera_data y volvé a guardar.",
-      };
-    }
-
-    return { error: mensaje };
+    return { error: e instanceof Error ? e.message : "No se pudo guardar." };
   }
 
-  revalidatePath("/admin/ajustes");
+  revalidatePath("/admin");
   return { ok: "Ajustes guardados." };
 }

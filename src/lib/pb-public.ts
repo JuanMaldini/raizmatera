@@ -6,7 +6,13 @@
  * Las escrituras van por `pb-admin.ts`, que sí lleva token y es server-only.
  */
 import { cache } from "react";
-import type { Ajustes, Categoria, PbRecord, Producto } from "@/types/producto";
+import {
+  SEPARADOR_PLANTILLAS,
+  type Ajustes,
+  type Categoria,
+  type PbRecord,
+  type Producto,
+} from "@/types/producto";
 
 const PB_URL = (process.env.NEXT_PUBLIC_PB_URL ?? "").replace(/\/$/, "");
 const COLLECTION = process.env.NEXT_PUBLIC_PB_DATA ?? "raizmatera_data";
@@ -14,10 +20,31 @@ const COLLECTION = process.env.NEXT_PUBLIC_PB_DATA ?? "raizmatera_data";
 /** Slug del record que guarda los ajustes del sitio (no es un producto). */
 const SLUG_AJUSTES = "ajustes";
 
-const AJUSTES_POR_DEFECTO: Ajustes = {
+export const AJUSTES_POR_DEFECTO: Ajustes = {
   whatsapp: "",
-  plantilla: "¡Hola Raíz Matera! Me interesa el {producto} ({precio}). ¿Está disponible?",
+  plantillaProducto:
+    "¡Hola Raíz Matera! Me interesa el {producto} ({precio}). ¿Está disponible?",
+  plantillaGeneral: "¡Hola Raíz Matera! Quería hacerles una consulta.",
 };
+
+/**
+ * Las dos plantillas viajan en un solo campo de texto, separadas por una línea
+ * `---`. Si no hay separador, todo el contenido es la de producto y la general
+ * queda en su valor por defecto.
+ */
+export function separarPlantillas(description: string): {
+  producto: string;
+  general: string;
+} {
+  const partes = (description ?? "").split(
+    new RegExp(`^\\s*${SEPARADOR_PLANTILLAS}\\s*$`, "m")
+  );
+
+  return {
+    producto: partes[0]?.trim() || AJUSTES_POR_DEFECTO.plantillaProducto,
+    general: partes[1]?.trim() || AJUSTES_POR_DEFECTO.plantillaGeneral,
+  };
+}
 
 /** URL pública de un archivo guardado en PocketBase. */
 export function pbFileUrl(recordId: string, filename: string): string {
@@ -104,8 +131,11 @@ export const getAjustes = cache(async (): Promise<Ajustes> => {
   const record = records.find((r) => r.slug === SLUG_AJUSTES);
   if (!record) return AJUSTES_POR_DEFECTO;
 
+  const plantillas = separarPlantillas(record.description ?? "");
+
   return {
     whatsapp: (record.title ?? "").replace(/\D/g, ""),
-    plantilla: record.description?.trim() || AJUSTES_POR_DEFECTO.plantilla,
+    plantillaProducto: plantillas.producto,
+    plantillaGeneral: plantillas.general,
   };
 });

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { listarRecords, SLUG_AJUSTES, urlsDeFotos } from "@/lib/pb-admin";
+import { separarPlantillas } from "@/lib/pb-public";
 import { precio } from "@/lib/format";
+import { AjustesForm } from "./AjustesForm";
 
 export const dynamic = "force-dynamic";
 
@@ -9,10 +11,22 @@ export default async function AdminProductos() {
   const records = await listarRecords();
   const productos = records.filter((r) => r.slug !== SLUG_AJUSTES);
 
+  const ajustes = records.find((r) => r.slug === SLUG_AJUSTES);
+  const plantillas = separarPlantillas(ajustes?.description ?? "");
+
   return (
     <>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl">Productos ({productos.length})</h1>
+      <section className="mb-12">
+        <h1 className="mb-6 text-xl">Ajustes</h1>
+        <AjustesForm
+          whatsapp={ajustes?.title ?? ""}
+          plantillaProducto={plantillas.producto}
+          plantillaGeneral={plantillas.general}
+        />
+      </section>
+
+      <div className="mb-6 flex items-center justify-between border-t border-oliva/15 pt-10">
+        <h2 className="text-xl">Productos ({productos.length})</h2>
         <Link
           href="/admin/producto/nuevo"
           className="bg-oliva px-4 py-2 text-xs uppercase tracking-widest text-arena hover:bg-oliva/90"

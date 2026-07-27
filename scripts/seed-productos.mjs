@@ -160,13 +160,18 @@ const PRODUCTOS = [
 // Record de ajustes: no es un producto, así que va sin categoría y el front lo
 // deja fuera del catálogo por eso mismo. `title` guarda el número de WhatsApp y
 // `description`, la plantilla del mensaje.
+// Las dos plantillas comparten el campo `description`, separadas por una línea
+// con "---": la de arriba es la de producto, la de abajo la del contacto general.
 const AJUSTES = {
   slug: "ajustes",
   title: "",
   category: "",
   price: 0,
-  description:
+  description: [
     "¡Hola Raíz Matera! Me interesa el {producto} ({precio}). ¿Está disponible?",
+    "---",
+    "¡Hola Raíz Matera! Quería hacerles una consulta.",
+  ].join("\n"),
 };
 
 // ── PocketBase ─────────────────────────────────────────────────────────────

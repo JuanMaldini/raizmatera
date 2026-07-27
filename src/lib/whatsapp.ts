@@ -1,8 +1,17 @@
 import { precio } from "./format";
 import type { Ajustes, Producto } from "@/types/producto";
 
-/** Variables que quien administra puede usar dentro de la plantilla. */
+/** Variables que quien administra puede usar en la plantilla de producto. */
 export const VARIABLES = ["{producto}", "{precio}", "{link}"] as const;
+
+/** Usuario de Instagram de la marca. */
+export const INSTAGRAM = "raiiz_matera";
+
+/** Perfil público. */
+export const INSTAGRAM_PERFIL = `https://instagram.com/${INSTAGRAM}`;
+
+/** Mensajes directos: ig.me/m abre el chat en vez del perfil. */
+export const INSTAGRAM_DM = `https://ig.me/m/${INSTAGRAM}`;
 
 interface Contexto {
   producto: string;
@@ -18,8 +27,20 @@ export function renderPlantilla(plantilla: string, ctx: Contexto): string {
     .replaceAll("{link}", ctx.link);
 }
 
+function soloDigitos(numero: string): string {
+  return numero.replace(/\D/g, "");
+}
+
+/** Arma un link de wa.me con el texto ya encodeado. */
+export function linkWhatsapp(numero: string, texto: string): string | null {
+  const limpio = soloDigitos(numero);
+  if (!limpio) return null;
+
+  return `https://wa.me/${limpio}?text=${encodeURIComponent(texto)}`;
+}
+
 /**
- * Arma el link de WhatsApp para un producto.
+ * Link de WhatsApp para consultar por un producto.
  *
  * Devuelve `null` si todavía no se cargó el número, para que el botón no se
  * pinte apuntando a ningún lado.
@@ -29,38 +50,16 @@ export function linkProducto(
   ajustes: Ajustes,
   siteUrl: string
 ): string | null {
-  const numero = ajustes.whatsapp.replace(/\D/g, "");
-  if (!numero) return null;
-
-  const texto = renderPlantilla(ajustes.plantilla, {
+  const texto = renderPlantilla(ajustes.plantillaProducto, {
     producto: producto.nombre,
     precio: precio(producto.precio),
     link: `${siteUrl.replace(/\/$/, "")}/producto/${producto.slug}`,
   });
 
-  return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
-}
-
-/**
- * Mensaje para el contacto general, donde no hay ningún producto.
- *
- * Sale de la misma plantilla, quitándole las oraciones que mencionan variables:
- * "¡Hola Raíz Matera! Me interesa el {producto} ({precio}). ¿Está disponible?"
- * queda en "¡Hola Raíz Matera!". Así se configura un solo texto en el panel y
- * sirve para los dos casos, sin que quede un "Me interesa el  ()." colgado.
- */
-export function mensajeGeneral(plantilla: string): string {
-  const oraciones = plantilla.split(/(?<=[.!?…])\s+/);
-  const limpias = oraciones.filter((o) => !o.includes("{"));
-  return limpias.join(" ").trim() || "¡Hola Raíz Matera!";
+  return linkWhatsapp(ajustes.whatsapp, texto);
 }
 
 /** Link de contacto general, sin producto. */
 export function linkContacto(ajustes: Ajustes): string | null {
-  const numero = ajustes.whatsapp.replace(/\D/g, "");
-  if (!numero) return null;
-
-  return `https://wa.me/${numero}?text=${encodeURIComponent(
-    mensajeGeneral(ajustes.plantilla)
-  )}`;
+  return linkWhatsapp(ajustes.whatsapp, ajustes.plantillaGeneral);
 }

@@ -35,9 +35,17 @@ export interface Producto {
 
 /**
  * Ajustes del sitio. Viven en un record de `raizmatera_data` sin categoría:
- * `title` guarda el número y `description`, la plantilla del mensaje.
+ * `title` guarda el número de WhatsApp y `description`, las dos plantillas de
+ * mensaje separadas por una línea `---` (no hay más campos libres donde
+ * ponerlas).
  */
 export interface Ajustes {
   whatsapp: string;
-  plantilla: string;
+  /** El que se manda al consultar por un producto. Admite variables. */
+  plantillaProducto: string;
+  /** El del contacto general, donde no hay ningún producto. */
+  plantillaGeneral: string;
 }
+
+/** Separador de las dos plantillas dentro de `description`. */
+export const SEPARADOR_PLANTILLAS = "---";
