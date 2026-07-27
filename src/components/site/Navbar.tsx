@@ -25,13 +25,13 @@ export function Navbar() {
 
         <ul className="flex items-center gap-6 text-sm uppercase tracking-widest text-oliva">
           <li>
-            <Link href="/#catalogo" className="hover:text-caramelo">
-              Catálogo
+            <Link href="/#nosotros" className="hover:text-caramelo">
+              Nosotros
             </Link>
           </li>
           <li>
-            <Link href="/#nosotros" className="hover:text-caramelo">
-              Nosotros
+            <Link href="/#catalogo" className="hover:text-caramelo">
+              Catálogo
             </Link>
           </li>
           <li>
