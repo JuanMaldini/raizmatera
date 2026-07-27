@@ -3,6 +3,16 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* El navbar es sticky y mide unos 72px, así que al saltar a un ancla la
+     sección arrancaría tapada. Este margen la baja lo justo. */
+  [id] {
+    scroll-margin-top: 5.5rem;
+  }
+
   body {
     @apply bg-arena text-tinta font-sans antialiased;
   }

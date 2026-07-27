@@ -20,12 +20,6 @@ export function Hero() {
             Calabaza, algarrobo, cuero y alpaca. Piezas hechas de a una, para
             acompañar todos los días.
           </p>
-          <a
-            href="#catalogo"
-            className="border border-oliva px-6 py-2 text-sm uppercase tracking-widest text-oliva transition hover:bg-oliva hover:text-arena"
-          >
-            Ver catálogo
-          </a>
         </div>
       </div>
     </section>

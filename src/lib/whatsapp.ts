@@ -41,8 +41,26 @@ export function linkProducto(
   return `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
 }
 
+/**
+ * Mensaje para el contacto general, donde no hay ningún producto.
+ *
+ * Sale de la misma plantilla, quitándole las oraciones que mencionan variables:
+ * "¡Hola Raíz Matera! Me interesa el {producto} ({precio}). ¿Está disponible?"
+ * queda en "¡Hola Raíz Matera!". Así se configura un solo texto en el panel y
+ * sirve para los dos casos, sin que quede un "Me interesa el  ()." colgado.
+ */
+export function mensajeGeneral(plantilla: string): string {
+  const oraciones = plantilla.split(/(?<=[.!?…])\s+/);
+  const limpias = oraciones.filter((o) => !o.includes("{"));
+  return limpias.join(" ").trim() || "¡Hola Raíz Matera!";
+}
+
 /** Link de contacto general, sin producto. */
 export function linkContacto(ajustes: Ajustes): string | null {
   const numero = ajustes.whatsapp.replace(/\D/g, "");
-  return numero ? `https://wa.me/${numero}` : null;
+  if (!numero) return null;
+
+  return `https://wa.me/${numero}?text=${encodeURIComponent(
+    mensajeGeneral(ajustes.plantilla)
+  )}`;
 }

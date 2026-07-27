@@ -102,72 +102,52 @@ El usuario admin se crea a mano desde la Admin UI de PocketBase.
 
 ### `raizmatera_data` — tipo Base
 
-Un record = un producto. A diferencia de `andrea-moro` (donde `published`, `slug`
-y `type` viven dentro de `json`), acá son columnas reales: permite filtrar y
-ordenar del lado del servidor y escribir API Rules sobre esos valores.
+Un record = un producto.
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `title` | Text | requerido |
-| `slug` | Text | requerido, **índice único** |
-| `description` | Text | descripción larga |
-| `price` | Number | ARS, min 0 |
-| `category` | Select single | `mates` · `accesorios` |
-| `published` | Bool | |
-| `order` | Number | orden en la grilla |
-| `files` | File multiple | max 10 · 5 MB · `image/jpeg, image/png, image/webp` |
-| `json` | JSON | ver abajo |
+| `title` | Text | nombre del producto |
+| `slug` | Text | Nonempty |
+| `description` | Text | resumen + specs |
+| `price` | Number | ARS, min 0, **Nonzero** |
+| `category` | Text | `mates` · `accesorios` |
+| `files` | File multiple | fotos |
 
-```sql
-CREATE UNIQUE INDEX idx_raizmatera_slug ON raizmatera_data (slug)
+**Reglas:** todas abiertas.
+
+Consecuencia: **la web pública lee sin token**. `PB_ADMIN_TOKEN` queda solo para
+los scripts de seed y nunca llega al navegador.
+
+**Specs dentro de `description`.** No hay campo `json`, así que las
+características van como líneas que empiezan con `-`, igual que en el catálogo
+impreso. `separarSpecs()` en `lib/pb-public.ts` las separa del texto corrido y el
+front las pinta como lista:
+
+```
+Algarrobo y acero, sin vueltas. Liviano, resistente y de agarre justo.
+- Algarrobo
+- Virola de acero
 ```
 
-**API Rules**
+**Sin índice único en `slug`.** La unicidad se valida en `admin/actions.ts` antes
+de guardar. Conviene agregar igual el índice en PocketBase: el seed y cualquier
+edición hecha desde la Admin UI se saltean esa validación.
 
-| Regla | Valor |
-|---|---|
-| List / View | `published = true` |
-| Create / Update / Delete | `@request.auth.admin = true` |
+### Record de ajustes
 
-Consecuencia clave: **la web pública lee sin token**. `PB_ADMIN_TOKEN` queda solo
-para los scripts de seed y nunca llega al navegador.
-
-**`json` de un producto**
-
-```json
-{
-  "specs": ["100% calabaza", "Forrado en cuero", "Virola de alpaca cincelada"],
-  "badge": "Destacado"
-}
-```
-
-### Records de sistema
-
-Viven en `raizmatera_data` sin `category`, identificados por `json.type`.
-
-**Settings** — lo que edita el dashboard en `/admin/ajustes`:
-
-```json
-{
-  "type": "settings",
-  "whatsapp": {
-    "number": "5493576483367",
-    "template": "¡Hola Raíz Matera! Me interesa el {producto} ({precio}). ¿Está disponible?"
-  }
-}
-```
+Un record sin categoría, con `slug = "ajustes"`. Como no hay campo `json`, usa
+los que existen: **`title` guarda el número de WhatsApp** y **`description`, la
+plantilla del mensaje**. Es lo que edita `/admin/ajustes`.
 
 Variables de la plantilla: `{producto}` · `{precio}` · `{link}`.
-El botón arma `https://wa.me/{number}?text=<plantilla renderizada y encodeada>`.
+El botón arma `https://wa.me/{numero}?text=<plantilla renderizada y encodeada>`.
 
-El número se valida a solo dígitos con código de país, sin `+` ni espacios. El
-formulario muestra preview en vivo con un producto real y un botón "Probar" que
-abre el link.
+Un producto es un record **con** categoría, así que el de ajustes queda fuera del
+catálogo por construcción, sin necesidad de un campo que lo marque.
 
-Va con `published = true` para que el front lo lea sin token — el número de
-WhatsApp es información pública por definición.
-
-Mismo patrón disponible para `{"type":"gallery"}` y `{"type":"hero"}`.
+> **Pendiente:** `price` tiene la restricción **Nonzero** y el record de ajustes
+> va en 0, así que PocketBase lo rechaza. Destildar Nonzero en ese campo y
+> guardar de nuevo desde `/admin/ajustes`.
 
 ### Variables de entorno
 
@@ -175,9 +155,12 @@ Mismo patrón disponible para `{"type":"gallery"}` y `{"type":"hero"}`.
 NEXT_PUBLIC_PB_URL=https://pocketbase.vmoliver.cloud
 NEXT_PUBLIC_PB_DATA=raizmatera_data
 NEXT_PUBLIC_PB_USERS=raizmatera_user
-NEXT_PUBLIC_SITE_URL=https://raizmatera.com
 PB_ADMIN_TOKEN=...          # server-side y scripts, nunca NEXT_PUBLIC_
 ```
+
+No hay variable con la URL del sitio: todavía no hay dominio propio, así que
+`lib/site.ts` la deduce de las variables que inyecta Vercel y cae a
+`localhost:3000` en desarrollo.
 
 El `PB_ADMIN_TOKEN` de `andrea-moro` sirve tal cual: es de superusuario y no está
 atado a una colección.
@@ -303,8 +286,14 @@ Instagram: [@raiiz_matera](https://instagram.com/raiiz_matera)
 | # | Qué | Estado |
 |---|---|---|
 | 0 | Extraer y convertir las 13 fotos + assets de marca | ✅ |
-| 1 | Scaffold Next 15 + pnpm + Tailwind con los tokens | pendiente |
-| 2 | Crear las colecciones en PocketBase + seed | pendiente |
-| 3 | Landing + `/producto/[slug]` + WhatsApp | pendiente |
-| 4 | `/login` + middleware + `/admin` | pendiente |
-| 5 | SEO, JSON-LD, sitemap, OG, deploy | pendiente |
+| 1 | Scaffold Next 15 + pnpm + Tailwind con los tokens | ✅ |
+| 2 | Colecciones en PocketBase + seed de los 13 productos | ✅ |
+| 3 | Landing + `/producto/[slug]` + WhatsApp | ✅ |
+| 4 | `/login` + middleware + `/admin` | ✅ |
+| 5 | SEO, JSON-LD, sitemap, robots | ✅ |
+| 6 | Deploy en Vercel | pendiente |
+
+Queda pendiente, aparte del deploy: destildar **Nonzero** en `price` para poder
+guardar los ajustes, agregar el **índice único en `slug`**, y cargar el **número
+de WhatsApp** desde `/admin/ajustes` — sin él, el botón de consulta se reemplaza
+por uno a Instagram.
