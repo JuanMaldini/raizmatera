@@ -7,11 +7,12 @@ export const VARIABLES = ["{producto}", "{precio}", "{link}"] as const;
 /** Usuario de Instagram de la marca. */
 export const INSTAGRAM = "raiiz_matera";
 
-/** Perfil público. */
+/**
+ * Perfil público. Se apunta acá y no a `ig.me/m/` (los mensajes directos):
+ * ese atajo solo resuelve para cuentas con mensajería habilitada y en esta
+ * queda en una página de error.
+ */
 export const INSTAGRAM_PERFIL = `https://instagram.com/${INSTAGRAM}`;
-
-/** Mensajes directos: ig.me/m abre el chat en vez del perfil. */
-export const INSTAGRAM_DM = `https://ig.me/m/${INSTAGRAM}`;
 
 interface Contexto {
   producto: string;

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { eliminarFoto, eliminarProducto, guardarProducto, type EstadoForm } from "./actions";
-import { CATEGORIAS } from "@/types/producto";
+import { CategoriaInput } from "./CategoriaInput";
 
 interface Props {
   id?: string;
@@ -16,6 +16,8 @@ interface Props {
     category: string;
   };
   fotos?: { url: string; nombre: string }[];
+  /** Las categorías ya usadas, para sugerirlas mientras se escribe. */
+  categorias?: string[];
 }
 
 const campo =
@@ -36,7 +38,7 @@ function Guardar() {
   );
 }
 
-export function ProductoForm({ id, valores, fotos = [] }: Props) {
+export function ProductoForm({ id, valores, fotos = [], categorias = [] }: Props) {
   const [estado, accion] = useActionState<EstadoForm, FormData>(guardarProducto, {});
 
   return (
@@ -47,16 +49,6 @@ export function ProductoForm({ id, valores, fotos = [] }: Props) {
         <label className="flex flex-col gap-1">
           <span className={etiqueta}>Nombre</span>
           <input name="title" defaultValue={valores?.title} required className={campo} />
-        </label>
-
-        <label className="flex flex-col gap-1">
-          <span className={etiqueta}>Slug</span>
-          <input
-            name="slug"
-            defaultValue={valores?.slug}
-            placeholder="se arma solo del nombre si lo dejás vacío"
-            className={campo}
-          />
         </label>
 
         <div className="grid gap-5 sm:grid-cols-2">
@@ -75,19 +67,12 @@ export function ProductoForm({ id, valores, fotos = [] }: Props) {
 
           <label className="flex flex-col gap-1">
             <span className={etiqueta}>Categoría</span>
-            <select
-              name="category"
-              defaultValue={valores?.category ?? ""}
-              required
+            <CategoriaInput
+              nombre="category"
+              existentes={categorias}
+              valorInicial={valores?.category ?? ""}
               className={campo}
-            >
-              <option value="">Elegir…</option>
-              {CATEGORIAS.map((c) => (
-                <option key={c.valor} value={c.valor}>
-                  {c.etiqueta}
-                </option>
-              ))}
-            </select>
+            />
           </label>
         </div>
 

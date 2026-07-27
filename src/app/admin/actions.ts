@@ -11,7 +11,7 @@ import {
   quitarFoto,
   SLUG_AJUSTES,
 } from "@/lib/pb-admin";
-import { SEPARADOR_PLANTILLAS } from "@/types/producto";
+import { normalizarCategoria, SEPARADOR_PLANTILLAS } from "@/types/producto";
 
 export interface EstadoForm {
   error?: string;
@@ -66,14 +66,15 @@ async function crearRecordDeAjustes(plantilla: string, numero: string) {
 
 function leerProducto(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
-  const slugCrudo = String(formData.get("slug") ?? "").trim();
 
   return {
     title,
-    slug: slugificar(slugCrudo || title),
+    // El slug no se escribe a mano: sale siempre del nombre. Como efecto,
+    // renombrar un producto le cambia la URL y la vieja deja de resolver.
+    slug: slugificar(title),
     description: String(formData.get("description") ?? "").trim(),
     price: Number(formData.get("price") ?? 0),
-    category: String(formData.get("category") ?? "").trim(),
+    category: normalizarCategoria(String(formData.get("category") ?? "")),
   };
 }
 
@@ -85,8 +86,10 @@ export async function guardarProducto(
   const datos = leerProducto(formData);
 
   if (!datos.title) return { error: "Falta el nombre del producto." };
-  if (!datos.slug) return { error: "Falta el slug." };
-  if (!datos.category) return { error: "Elegí una categoría." };
+  if (!datos.slug) {
+    return { error: "Del nombre no sale ninguna URL válida. Probá con otro." };
+  }
+  if (!datos.category) return { error: "Falta la categoría." };
   if (!Number.isFinite(datos.price) || datos.price <= 0) {
     return { error: "El precio tiene que ser mayor que cero." };
   }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { obtenerRecord, urlsDeFotos } from "@/lib/pb-admin";
+import { listarCategorias, obtenerRecord, urlsDeFotos } from "@/lib/pb-admin";
 import { ProductoForm } from "../../ProductoForm";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +19,8 @@ export default async function EditarProducto({
     notFound();
   }
 
+  const categorias = await listarCategorias();
+
   return (
     <>
       <Link href="/admin" className="text-xs uppercase tracking-widest text-oliva">
@@ -36,6 +38,7 @@ export default async function EditarProducto({
           category: record.category ?? "",
         }}
         fotos={urlsDeFotos(record)}
+        categorias={categorias}
       />
     </>
   );

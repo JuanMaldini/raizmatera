@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 import { ProductCard } from "./ProductCard";
-import { CATEGORIAS, type Categoria, type Producto } from "@/types/producto";
+import { etiquetaCategoria, type Categoria, type Producto } from "@/types/producto";
 
 type Filtro = Categoria | "todos";
 
 export function Catalogo({ productos }: { productos: Producto[] }) {
   const [filtro, setFiltro] = useState<Filtro>("todos");
 
-  // Solo se ofrecen las categorías que realmente tienen productos cargados.
-  const disponibles = CATEGORIAS.filter((c) =>
-    productos.some((p) => p.categoria === c.valor)
-  );
+  // Las categorías salen de los productos cargados, no de una lista fija: si
+  // mañana aparece una nueva desde el panel, el filtro la muestra sola.
+  const disponibles = [...new Set(productos.map((p) => p.categoria))]
+    .filter(Boolean)
+    .sort()
+    .map((valor) => ({ valor, etiqueta: etiquetaCategoria(valor) }));
 
   const visibles =
     filtro === "todos" ? productos : productos.filter((p) => p.categoria === filtro);
@@ -25,7 +27,7 @@ export function Catalogo({ productos }: { productos: Producto[] }) {
 
       {disponibles.length > 1 && (
         <div className="mb-10 flex justify-center gap-3">
-          {[{ valor: "todos" as const, etiqueta: "Todo" }, ...disponibles].map((c) => (
+          {[{ valor: "todos", etiqueta: "Todo" }, ...disponibles].map((c) => (
             <button
               key={c.valor}
               type="button"

@@ -129,6 +129,19 @@ export async function quitarFoto(id: string, filename: string): Promise<void> {
   refrescar();
 }
 
+/**
+ * Las categorías que ya están en uso, ordenadas. Alimentan las sugerencias del
+ * panel: no hay una lista fija en el código.
+ */
+export async function listarCategorias(): Promise<string[]> {
+  const records = await listarRecords();
+  const usadas = new Set(
+    records.map((r) => (r.category ?? "").trim().toLowerCase()).filter(Boolean)
+  );
+
+  return [...usadas].sort();
+}
+
 /** URLs de las fotos de un record, para mostrarlas en el panel. */
 export function urlsDeFotos(record: PbRecord): { url: string; nombre: string }[] {
   return (record.files ?? []).map((f) => ({ url: pbFileUrl(record.id, f), nombre: f }));

@@ -12,12 +12,22 @@ export interface PbRecord {
   updated: string;
 }
 
-export type Categoria = "mates" | "accesorios";
+/**
+ * Las categorías no son una lista fija: son lo que haya cargado en los
+ * productos. El panel sugiere las que ya existen mientras se escribe, pero
+ * nada impide inventar una nueva.
+ */
+export type Categoria = string;
 
-export const CATEGORIAS: { valor: Categoria; etiqueta: string }[] = [
-  { valor: "mates", etiqueta: "Mates" },
-  { valor: "accesorios", etiqueta: "Accesorios" },
-];
+/** "mates" -> "Mates", para mostrarla sin tocar el dato guardado. */
+export function etiquetaCategoria(categoria: Categoria): string {
+  return categoria.charAt(0).toUpperCase() + categoria.slice(1);
+}
+
+/** Normaliza lo que se escribe en el panel: minúsculas y sin espacios de más. */
+export function normalizarCategoria(categoria: string): string {
+  return categoria.trim().toLowerCase();
+}
 
 /** Un producto ya listo para pintar. */
 export interface Producto {
