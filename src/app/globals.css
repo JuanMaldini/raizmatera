@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-arena text-tinta font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif text-oliva;
+  }
+}
+
+@layer components {
+  /* El marco de doble filete de la portada del catálogo. */
+  .marco-doble {
+    @apply border border-oliva/60 p-1.5;
+  }
+
+  .marco-doble > * {
+    @apply border border-oliva/40;
+  }
+
+  /* El chip de precio: rectangular y sin radio, como en el PDF. */
+  .chip-precio {
+    @apply inline-block bg-caramelo px-4 py-1.5 font-serif text-lg text-tinta;
+  }
+
+  /* Etiqueta de sección al estilo "~ MATES ~". */
+  .etiqueta-seccion::before,
+  .etiqueta-seccion::after {
+    content: "~";
+    @apply mx-2 inline-block;
+  }
+}

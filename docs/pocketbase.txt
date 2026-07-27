@@ -1,0 +1,38 @@
+Una captura de pantalla en modo oscuro muestra dos ventanas de "Edit collection" de PocketBase abiertas lado a lado, comparando la estructura de dos colecciones diferentes.
+
+Panel izquierdo – Colección Base (raizmatera_data)
+Tipo: Base
+Nombre: raizmatera_data
+Pestaña activa: Fields
+Campos definidos:
+id (texto, requerido)
+title (texto)
+slug (texto, marcado como no vacío)
+description (texto)
+price (número, valor mínimo 0)
+category (texto)
+files (archivo, permite múltiples archivos)
+created (fecha/hora, creación automática)
+updated (fecha/hora, actualización automática)
+En la parte inferior aparece el botón "+ New field".
+No existen índices ni restricciones únicas (Unique constraints and indexes (0)).
+Panel derecho – Colección Auth (raizmatera_user)
+Tipo: Auth
+Nombre: raizmatera_user
+Pestaña activa: Fields
+Campos estándar de autenticación:
+id
+password (oculto)
+tokenKey (oculto)
+email
+emailVisibility
+verified
+created
+updated
+También aparece el botón "+ New field".
+En la parte inferior se observan dos restricciones únicas:
+Unique: tokenKey
+Unique: email
+Disposición visual
+
+La interfaz está dividida verticalmente en dos paneles de igual tamaño para facilitar la comparación entre ambas colecciones. Ambas utilizan el mismo tema oscuro, con tablas de campos, iconos para cada tipo de dato, engranajes de configuración al extremo derecho de cada fila y etiquetas verdes indicando restricciones como Nonempty o Nonzero. El panel izquierdo representa una colección de datos personalizada (productos o contenido), mientras que el derecho corresponde a una colección de usuarios con autenticación integrada de PocketBase.
