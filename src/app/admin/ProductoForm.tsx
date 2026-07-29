@@ -58,7 +58,7 @@ export function ProductoForm({ id, valores, fotos = [], categorias = [] }: Props
               type="number"
               name="price"
               min={1}
-              step={100}
+              step={1}
               defaultValue={valores?.price}
               required
               className={campo}
