@@ -60,6 +60,8 @@ export interface DatosProducto {
   description: string;
   price: number;
   category: string;
+  /** Requiere el campo `estado` (Select) en la colección; si falta, PocketBase lo ignora. */
+  estado?: string;
 }
 
 export async function crearProducto(datos: DatosProducto): Promise<PbRecord> {

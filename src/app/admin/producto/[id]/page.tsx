@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listarCategorias, obtenerRecord, urlsDeFotos } from "@/lib/pb-admin";
+import { normalizarEstado } from "@/types/producto";
 import { ProductoForm } from "../../ProductoForm";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,7 @@ export default async function EditarProducto({
           description: record.description ?? "",
           price: record.price ?? 0,
           category: record.category ?? "",
+          estado: normalizarEstado(record.estado),
         }}
         fotos={urlsDeFotos(record)}
         categorias={categorias}

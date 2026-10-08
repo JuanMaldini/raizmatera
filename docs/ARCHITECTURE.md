@@ -112,10 +112,28 @@ Un record = un producto.
 | `price` | Number | ARS, min 0, **Nonzero** |
 | `category` | Text | `mates` · `accesorios` |
 | `files` | File multiple | fotos |
+| `estado` | Select (single) | `disponible` · `agotado` · `oculto` — no requerido; vacío = disponible |
 
-**Reglas:** todas abiertas.
+**Reglas**
 
-Consecuencia: **la web pública lee sin token**. `PB_ADMIN_TOKEN` queda solo para
+| Regla | Valor |
+|---|---|
+| List / View | vacía (pública) |
+| Create / Update / Delete | `@request.auth.collectionName = "raizmatera_user"` |
+
+La instancia se comparte con `andrea-moro`, así que **no alcanza con
+`@request.auth.id != ""`**: eso deja escribir a cualquier usuario logueado de
+*cualquier* colección auth de la instancia. Hay que fijar la colección.
+
+**Estado del producto.** `agotado` se sigue mostrando con un cartel y el botón de
+WhatsApp pide aviso de reposición (JSON-LD `OutOfStock`). `oculto` no sale en el
+catálogo, la ficha da 404 y no entra al sitemap. Se filtra en `esProducto()` de
+`lib/pb-public.ts`.
+
+**Slug estable.** Se genera del nombre solo al crear el producto; al editar se
+conserva, así renombrar no rompe los links ya compartidos.
+
+Consecuencia de las reglas: **la web pública lee sin token**. `PB_ADMIN_TOKEN` queda solo para
 los scripts de seed y nunca llega al navegador.
 
 **Specs dentro de `description`.** No hay campo `json`, así que las

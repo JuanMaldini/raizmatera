@@ -12,6 +12,11 @@ export function ProductCard({ producto }: { producto: Producto }) {
       className="group flex flex-col bg-crudo transition hover:shadow-md"
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-sage/20">
+        {producto.estado === "agotado" && (
+          <span className="absolute left-3 top-3 z-10 bg-oliva px-2 py-1 text-xs uppercase tracking-widest text-arena">
+            Agotado
+          </span>
+        )}
         {foto ? (
           <Image
             src={foto}

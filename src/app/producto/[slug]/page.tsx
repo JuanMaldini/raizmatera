@@ -63,7 +63,10 @@ export default async function ProductoPage({
       "@type": "Offer",
       price: producto.precio,
       priceCurrency: "ARS",
-      availability: "https://schema.org/InStock",
+      availability:
+        producto.estado === "agotado"
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
       url: `${base}/producto/${producto.slug}`,
     },
   };
@@ -112,7 +115,14 @@ export default async function ProductoPage({
               </ul>
             )}
 
-            <span className="chip-precio">{precio(producto.precio)}</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="chip-precio">{precio(producto.precio)}</span>
+              {producto.estado === "agotado" && (
+                <span className="bg-oliva px-2 py-1 text-xs uppercase tracking-widest text-arena">
+                  Agotado
+                </span>
+              )}
+            </div>
 
             <div className="flex w-full max-w-xs flex-col gap-3">
               {whatsapp && (
@@ -122,7 +132,9 @@ export default async function ProductoPage({
                   rel="noreferrer"
                   className="bg-oliva px-6 py-2.5 text-center text-sm uppercase tracking-widest text-arena transition hover:bg-oliva/90 hover:shadow-md"
                 >
-                  Consultar por WhatsApp
+                  {producto.estado === "agotado"
+                    ? "Avisame cuando vuelva"
+                    : "Consultar por WhatsApp"}
                 </a>
               )}
 

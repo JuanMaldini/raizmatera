@@ -8,10 +8,15 @@ import {
   borrarProducto,
   crearProducto,
   listarRecords,
+  obtenerRecord,
   quitarFoto,
   SLUG_AJUSTES,
 } from "@/lib/pb-admin";
-import { normalizarCategoria, SEPARADOR_PLANTILLAS } from "@/types/producto";
+import {
+  normalizarCategoria,
+  normalizarEstado,
+  SEPARADOR_PLANTILLAS,
+} from "@/types/producto";
 
 export interface EstadoForm {
   error?: string;
@@ -69,12 +74,14 @@ function leerProducto(formData: FormData) {
 
   return {
     title,
-    // El slug no se escribe a mano: sale siempre del nombre. Como efecto,
-    // renombrar un producto le cambia la URL y la vieja deja de resolver.
+    // El slug no se escribe a mano: sale del nombre al crear el producto. Al
+    // editar se conserva el que ya tenía (ver guardarProducto), para que
+    // renombrar no rompa los links ya compartidos.
     slug: slugificar(title),
     description: String(formData.get("description") ?? "").trim(),
     price: Number(formData.get("price") ?? 0),
     category: normalizarCategoria(String(formData.get("category") ?? "")),
+    estado: normalizarEstado(String(formData.get("estado") ?? "")),
   };
 }
 
@@ -84,6 +91,15 @@ export async function guardarProducto(
 ): Promise<EstadoForm> {
   const id = String(formData.get("id") ?? "");
   const datos = leerProducto(formData);
+
+  if (id) {
+    try {
+      const actual = await obtenerRecord(id);
+      if (actual.slug) datos.slug = actual.slug;
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : "No se encontró el producto." };
+    }
+  }
 
   if (!datos.title) return { error: "Falta el nombre del producto." };
   if (!datos.slug) {
@@ -109,7 +125,13 @@ export async function guardarProducto(
       await agregarFotos(record.id, fotos);
     }
   } catch (e) {
-    return { error: e instanceof Error ? e.message : "No se pudo guardar." };
+    const mensaje = e instanceof Error ? e.message : "";
+    // El índice único de `slug` en PocketBase rechaza duplicados que la
+    // comprobación de arriba no vio (p. ej. un alta simultánea).
+    if (mensaje.includes("slug")) {
+      return { error: `Ya hay otro producto con el slug "${datos.slug}".` };
+    }
+    return { error: mensaje || "No se pudo guardar." };
   }
 
   revalidatePath("/admin");

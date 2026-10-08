@@ -7,6 +7,7 @@
  */
 import { cache } from "react";
 import {
+  normalizarEstado,
   SEPARADOR_PLANTILLAS,
   type Ajustes,
   type Categoria,
@@ -104,15 +105,17 @@ function toProducto(record: PbRecord): Producto {
     descripcion,
     specs,
     imagenes: (record.files ?? []).map((f) => pbFileUrl(record.id, f)),
+    estado: normalizarEstado(record.estado),
   };
 }
 
 /**
  * Un record es un producto si tiene categoría. Los records de sistema —hoy solo
  * el de ajustes— van sin categoría y quedan fuera del catálogo por eso mismo.
+ * Los ocultos tampoco cuentan: no salen en el listado, la ficha ni el sitemap.
  */
 function esProducto(record: PbRecord): boolean {
-  return Boolean(record.category);
+  return Boolean(record.category) && normalizarEstado(record.estado) !== "oculto";
 }
 
 export const getProductos = cache(async (): Promise<Producto[]> => {

@@ -51,7 +51,13 @@ export function linkProducto(
   ajustes: Ajustes,
   siteUrl: string
 ): string | null {
-  const texto = renderPlantilla(ajustes.plantillaProducto, {
+  // Si está agotado no se pregunta por disponibilidad: se pide aviso.
+  const plantilla =
+    producto.estado === "agotado"
+      ? "¡Hola Raíz Matera! ¿Me avisan cuando vuelva el {producto}? {link}"
+      : ajustes.plantillaProducto;
+
+  const texto = renderPlantilla(plantilla, {
     producto: producto.nombre,
     precio: precio(producto.precio),
     link: `${siteUrl.replace(/\/$/, "")}/producto/${producto.slug}`,

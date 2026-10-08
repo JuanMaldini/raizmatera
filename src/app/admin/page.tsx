@@ -3,6 +3,7 @@ import Link from "next/link";
 import { listarRecords, SLUG_AJUSTES, urlsDeFotos } from "@/lib/pb-admin";
 import { separarPlantillas } from "@/lib/pb-public";
 import { precio } from "@/lib/format";
+import { normalizarEstado } from "@/types/producto";
 import { AjustesForm } from "./AjustesForm";
 
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ export default async function AdminProductos() {
         <ul className="divide-y divide-oliva/15 border border-oliva/15 bg-arena">
           {productos.map((record) => {
             const fotos = urlsDeFotos(record);
+            const estado = normalizarEstado(record.estado);
 
             return (
               <li key={record.id}>
@@ -61,7 +63,14 @@ export default async function AdminProductos() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-serif text-sm">{record.title}</p>
+                    <p className="truncate font-serif text-sm">
+                      {record.title}
+                      {estado !== "disponible" && (
+                        <span className="ml-2 border border-oliva/40 px-1.5 py-0.5 align-middle font-sans text-[10px] uppercase tracking-widest text-oliva">
+                          {estado}
+                        </span>
+                      )}
+                    </p>
                     <p className="truncate text-xs text-tinta/50">
                       {record.category || "sin categoría"} · /{record.slug}
                     </p>

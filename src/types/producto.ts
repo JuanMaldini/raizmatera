@@ -8,6 +8,8 @@ export interface PbRecord {
   /** "mates" | "accesorios" para productos; vacío para records de sistema. */
   category: string;
   files: string[];
+  /** Vacío en los records viejos: se lee como "disponible". */
+  estado?: string;
   created: string;
   updated: string;
 }
@@ -29,6 +31,22 @@ export function normalizarCategoria(categoria: string): string {
   return categoria.trim().toLowerCase();
 }
 
+/**
+ * - disponible: se muestra y se consulta normal.
+ * - agotado: se sigue mostrando, con cartel, y la consulta pide aviso.
+ * - oculto: no aparece en la web (ni en el sitemap); la ficha da 404.
+ */
+export const ESTADOS = ["disponible", "agotado", "oculto"] as const;
+export type EstadoProducto = (typeof ESTADOS)[number];
+
+/** Lo vacío o desconocido cuenta como disponible: no hace falta migrar nada. */
+export function normalizarEstado(estado: string | undefined | null): EstadoProducto {
+  const valor = (estado ?? "").trim().toLowerCase();
+  return (ESTADOS as readonly string[]).includes(valor)
+    ? (valor as EstadoProducto)
+    : "disponible";
+}
+
 /** Un producto ya listo para pintar. */
 export interface Producto {
   id: string;
@@ -41,6 +59,7 @@ export interface Producto {
   /** Las líneas que empiezan con "-", como en el catálogo impreso. */
   specs: string[];
   imagenes: string[];
+  estado: EstadoProducto;
 }
 
 /**

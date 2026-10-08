@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { eliminarFoto, eliminarProducto, guardarProducto, type EstadoForm } from "./actions";
 import { CategoriaInput } from "./CategoriaInput";
+import type { EstadoProducto } from "@/types/producto";
 
 interface Props {
   id?: string;
@@ -14,6 +15,7 @@ interface Props {
     description: string;
     price: number;
     category: string;
+    estado: EstadoProducto;
   };
   fotos?: { url: string; nombre: string }[];
   /** Las categorías ya usadas, para sugerirlas mientras se escribe. */
@@ -51,7 +53,7 @@ export function ProductoForm({ id, valores, fotos = [], categorias = [] }: Props
           <input name="title" defaultValue={valores?.title} required className={campo} />
         </label>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-3">
           <label className="flex flex-col gap-1">
             <span className={etiqueta}>Precio (ARS)</span>
             <input
@@ -73,6 +75,19 @@ export function ProductoForm({ id, valores, fotos = [], categorias = [] }: Props
               valorInicial={valores?.category ?? ""}
               className={campo}
             />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className={etiqueta}>Estado</span>
+            <select
+              name="estado"
+              defaultValue={valores?.estado ?? "disponible"}
+              className={campo}
+            >
+              <option value="disponible">Disponible</option>
+              <option value="agotado">Agotado (se ve con cartel)</option>
+              <option value="oculto">Oculto (no aparece en la web)</option>
+            </select>
           </label>
         </div>
 
